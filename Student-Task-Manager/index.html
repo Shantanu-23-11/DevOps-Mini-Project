@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Student Task Manager - Organize your study tasks efficiently. College DevOps Mini Project Phase 1.">
+  <title>Student Task Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- ==================== HEADER ==================== -->
+    <header class="app-header">
+      <div class="header-badge">DevOps Mini Project</div>
+      <h1 class="app-title">
+        <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+        </svg>
+        Student Task Manager
+      </h1>
+      <p class="app-subtitle">Organize your study tasks efficiently</p>
+    </header>
+
+    <!-- ==================== SUMMARY STATS CARDS ==================== -->
+    <section class="stats-section" aria-label="Task Summary Statistics">
+      <!-- Total Tasks Card -->
+      <div class="stat-card stat-total">
+        <div class="stat-icon-wrapper">
+          <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Total Tasks</span>
+          <span class="stat-count" id="totalTasksCount">0</span>
+        </div>
+      </div>
+
+      <!-- Pending Tasks Card -->
+      <div class="stat-card stat-pending">
+        <div class="stat-icon-wrapper">
+          <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Pending Tasks</span>
+          <span class="stat-count" id="pendingTasksCount">0</span>
+        </div>
+      </div>
+
+      <!-- Completed Tasks Card -->
+      <div class="stat-card stat-completed">
+        <div class="stat-icon-wrapper">
+          <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Completed Tasks</span>
+          <span class="stat-count" id="completedTasksCount">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== MAIN CARD ==================== -->
+    <main class="main-card">
+      
+      <!-- Add Task Form -->
+      <section class="add-task-section">
+        <form id="taskForm" class="task-form" autocomplete="off" novalidate>
+          <div class="input-group">
+            <input 
+              type="text" 
+              id="taskInput" 
+              class="task-input" 
+              placeholder="e.g., Complete Operating Systems lab assignment..." 
+              aria-label="Task description input"
+            >
+            <button type="submit" id="addTaskBtn" class="btn btn-primary">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Add Task</span>
+            </button>
+          </div>
+          <!-- Validation Error Message -->
+          <div id="validationMessage" class="validation-message" aria-live="polite"></div>
+        </form>
+      </section>
+
+      <!-- Filter Tabs Section -->
+      <section class="filter-section">
+        <div class="filter-header">
+          <h2 class="filter-title">My Tasks</h2>
+          <div class="filter-buttons" role="tablist" aria-label="Filter tasks">
+            <button type="button" class="filter-btn active" data-filter="all" role="tab" aria-selected="true">
+              All <span class="filter-badge" id="badgeAll">0</span>
+            </button>
+            <button type="button" class="filter-btn" data-filter="pending" role="tab" aria-selected="false">
+              Pending <span class="filter-badge" id="badgePending">0</span>
+            </button>
+            <button type="button" class="filter-btn" data-filter="completed" role="tab" aria-selected="false">
+              Completed <span class="filter-badge" id="badgeCompleted">0</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Task List & Empty State Container -->
+      <section class="task-list-section">
+        <ul id="taskList" class="task-list" aria-label="Student task list">
+          <!-- Tasks will be rendered dynamically by script.js -->
+        </ul>
+
+        <!-- Empty State (Shown when no tasks match the filter) -->
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon-wrapper">
+            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+              <line x1="8" y1="9" x2="16" y2="9"></line>
+              <line x1="8" y1="13" x2="16" y2="13"></line>
+              <line x1="8" y1="17" x2="12" y2="17"></line>
+            </svg>
+          </div>
+          <h3 class="empty-title" id="emptyTitle">No tasks yet</h3>
+          <p class="empty-desc" id="emptyDesc">Enter your task above and click 'Add Task' to organize your study schedule.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="app-footer">
+      <p>Student Task Manager &bull; DevOps Mini Project</p>
+    </footer>
+
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script src="script.js"></script>
+</body>
+</html>
+

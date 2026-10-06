@@ -1,0 +1,659 @@
+/* ==========================================================================
+   Student Task Manager - Stylesheet (style.css)
+   Phase 1: Pure CSS3 styling (Responsive, Clean, Modern Dashboard Layout)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. CSS Variables & Theme Configuration
+   -------------------------------------------------------------------------- */
+:root {
+  /* Color Palette */
+  --primary: #4f46e5;          /* Indigo 600 - Main Brand / Action Color */
+  --primary-hover: #4338ca;    /* Indigo 700 - Button hover state */
+  --primary-light: #eef2ff;    /* Indigo 50 - Active filter badge background */
+  
+  --bg-page: #f8fafc;          /* Slate 50 - Body background */
+  --bg-card: #ffffff;          /* Pure White - Main containers & cards */
+  --bg-hover: #f1f5f9;         /* Slate 100 - Task hover state */
+
+  --text-main: #0f172a;        /* Slate 900 - Headings & primary text */
+  --text-muted: #64748b;       /* Slate 500 - Secondary text / subtitles */
+  --text-completed: #94a3b8;   /* Slate 400 - Completed task text */
+
+  --border-color: #e2e8f0;     /* Slate 200 - Borders & dividers */
+  --border-focus: #818cf8;     /* Indigo 400 - Input focus ring */
+
+  /* Stat Card Accent Colors */
+  --total-color: #2563eb;      /* Blue 600 */
+  --total-bg: #eff6ff;         /* Blue 50 */
+  
+  --pending-color: #d97706;    /* Amber 600 */
+  --pending-bg: #fffbeb;       /* Amber 50 */
+  
+  --completed-color: #059669;  /* Emerald 600 */
+  --completed-bg: #ecfdf5;     /* Emerald 50 */
+
+  --danger-color: #dc2626;     /* Red 600 - Delete & errors */
+  --danger-bg: #fef2f2;        /* Red 50 */
+  --danger-border: #fca5a5;    /* Red 300 */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+
+  /* Border Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --transition: all 0.2s ease-in-out;
+}
+
+/* --------------------------------------------------------------------------
+   2. Global Reset & Base Styles
+   -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 2.5rem 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Central Layout Container */
+.app-container {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   3. Header Section
+   -------------------------------------------------------------------------- */
+.app-header {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.header-badge {
+  display: inline-block;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(79, 70, 229, 0.15);
+}
+
+.app-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  letter-spacing: -0.025em;
+}
+
+.title-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--primary);
+  stroke-width: 2.2;
+}
+
+.app-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+  font-weight: 400;
+}
+
+/* --------------------------------------------------------------------------
+   4. Summary Statistics Cards
+   -------------------------------------------------------------------------- */
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stat-count {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+  margin-top: 0.15rem;
+}
+
+/* Color Variations for Stats Cards */
+.stat-total .stat-icon-wrapper {
+  background-color: var(--total-bg);
+  color: var(--total-color);
+}
+
+.stat-pending .stat-icon-wrapper {
+  background-color: var(--pending-bg);
+  color: var(--pending-color);
+}
+
+.stat-completed .stat-icon-wrapper {
+  background-color: var(--completed-bg);
+  color: var(--completed-color);
+}
+
+/* --------------------------------------------------------------------------
+   5. Main Card Container
+   -------------------------------------------------------------------------- */
+.main-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   6. Add Task Section & Form
+   -------------------------------------------------------------------------- */
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.task-input {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background-color: #ffffff;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  outline: none;
+  transition: var(--transition);
+}
+
+.task-input::placeholder {
+  color: #94a3b8;
+}
+
+.task-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Input validation error state */
+.task-input.input-error {
+  border-color: var(--danger-color);
+  background-color: #fffbfa;
+}
+
+.task-input.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.35rem;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Validation Message */
+.validation-message {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--danger-color);
+  min-height: 1.25rem;
+  display: none;
+  align-items: center;
+  gap: 0.35rem;
+  padding-left: 0.25rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.validation-message.active {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   7. Filter Controls
+   -------------------------------------------------------------------------- */
+.filter-section {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.filter-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.filter-buttons {
+  display: flex;
+  background-color: #f1f5f9;
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  gap: 0.25rem;
+}
+
+.filter-btn {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--transition);
+}
+
+.filter-btn:hover {
+  color: var(--text-main);
+}
+
+.filter-btn.active {
+  background-color: #ffffff;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-badge {
+  font-size: 0.75rem;
+  background-color: rgba(100, 116, 139, 0.12);
+  color: inherit;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+}
+
+.filter-btn.active .filter-badge {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+/* --------------------------------------------------------------------------
+   8. Task List & Task Items
+   -------------------------------------------------------------------------- */
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  gap: 0.85rem;
+  transition: var(--transition);
+}
+
+.task-item:hover {
+  background-color: var(--bg-hover);
+  border-color: #cbd5e1;
+}
+
+.task-item-content {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex: 1;
+  min-width: 0; /* Prevents text overflow breaking layout */
+}
+
+/* Custom Checkbox Styling */
+.task-checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.task-checkbox:hover {
+  transform: scale(1.1);
+}
+
+/* Task Name */
+.task-text {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  word-break: break-word;
+  transition: var(--transition);
+}
+
+/* Completed Task Styling */
+.task-item.completed {
+  background-color: #fafafa;
+  border-color: #e5e7eb;
+}
+
+.task-item.completed .task-text {
+  text-decoration: line-through;
+  color: var(--text-completed);
+}
+
+/* Delete Button */
+.btn-delete {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.btn-delete:hover {
+  background-color: var(--danger-bg);
+  color: var(--danger-color);
+  transform: scale(1.05);
+}
+
+.btn-delete:focus-visible {
+  outline: 2px solid var(--danger-color);
+}
+
+.btn-delete svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* --------------------------------------------------------------------------
+   9. Empty State View
+   -------------------------------------------------------------------------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.75rem 1.5rem;
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+  background-color: #f8fafc;
+}
+
+.empty-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+}
+
+.empty-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.empty-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.empty-desc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  max-width: 320px;
+}
+
+/* --------------------------------------------------------------------------
+   10. Footer Section
+   -------------------------------------------------------------------------- */
+.app-footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding-bottom: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   11. Responsive Design (Desktop, Laptop, Tablet, Mobile)
+   -------------------------------------------------------------------------- */
+
+/* Tablet & Smaller Laptops (<= 768px) */
+@media (max-width: 768px) {
+  body {
+    padding: 1.5rem 0.85rem;
+  }
+
+  .app-container {
+    gap: 1.25rem;
+  }
+
+  .app-title {
+    font-size: 1.85rem;
+  }
+
+  .main-card {
+    padding: 1.35rem;
+  }
+
+  .stat-card {
+    padding: 0.95rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .stat-icon-wrapper {
+    width: 38px;
+    height: 38px;
+  }
+
+  .stat-count {
+    font-size: 1.4rem;
+  }
+}
+
+/* Mobile Devices (<= 520px) */
+@media (max-width: 520px) {
+  body {
+    padding: 1rem 0.65rem;
+  }
+
+  .app-title {
+    font-size: 1.55rem;
+  }
+
+  .title-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .app-subtitle {
+    font-size: 0.9rem;
+  }
+
+  /* Stack summary cards vertically on narrow mobile screens */
+  .stats-section {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .stat-card {
+    padding: 0.85rem 1rem;
+  }
+
+  /* Stack input and submit button on mobile */
+  .input-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  /* Filter section header arrangement */
+  .filter-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .filter-title {
+    text-align: left;
+  }
+
+  .filter-buttons {
+    display: flex;
+    width: 100%;
+  }
+
+  .filter-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.45rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .main-card {
+    padding: 1.15rem;
+  }
+
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+}
+
