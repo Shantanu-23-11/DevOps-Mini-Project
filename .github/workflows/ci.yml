@@ -1,0 +1,236 @@
+# ==============================================================================
+# GitHub Actions CI Workflow for Student Task Manager
+# Phase 3: Continuous Integration (CI) Pipeline
+# 
+# Project Topic: "CI/CD Pipeline for a Web Application using DevOps Tools"
+# ==============================================================================
+
+name: CI Pipeline
+
+# ------------------------------------------------------------------------------
+# Workflow Triggers:
+# 1. On every code push to the 'main' branch
+# 2. On any pull request opened/updated targeting the 'main' branch
+# ------------------------------------------------------------------------------
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# ------------------------------------------------------------------------------
+# CI Jobs Definition
+# ------------------------------------------------------------------------------
+jobs:
+  continuous-integration:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      # ========================================================================
+      # STEP 2 — CHECKOUT CODE
+      # Uses the official GitHub Actions checkout action (v4) to download the
+      # repository code into the runner's workspace environment.
+      # ========================================================================
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # ========================================================================
+      # STEP 3 — VALIDATE PROJECT STRUCTURE
+      # Verifies that all required frontend files (index.html, style.css, script.js)
+      # exist in the project repository. Fails immediately if any file is missing.
+      # ========================================================================
+      - name: Validate Project Structure
+        run: |
+          echo "=========================================="
+          echo "  STEP 2: VALIDATE PROJECT STRUCTURE      "
+          echo "=========================================="
+
+          # Navigate into Student-Task-Manager directory if present, else root
+          if [ -d "Student-Task-Manager" ]; then
+            cd Student-Task-Manager
+          fi
+
+          echo "Working directory: $(pwd)"
+          echo "Checking for required project files..."
+
+          REQUIRED_FILES=("index.html" "style.css" "script.js")
+          MISSING_FILES=0
+
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ -f "$file" ]; then
+              echo "  ✅ Found: $file"
+            else
+              echo "  ❌ Missing: $file"
+              MISSING_FILES=$((MISSING_FILES + 1))
+            fi
+          done
+
+          if [ $MISSING_FILES -gt 0 ]; then
+            echo "❌ Validation failed: $MISSING_FILES required file(s) are missing!"
+            exit 1
+          fi
+
+          echo "✅ Project structure is valid: All required files exist."
+
+      # ========================================================================
+      # STEP 4 — VALIDATE HTML
+      # Performs structural syntax validation using Python's standard HTMLParser.
+      # Checks DOCTYPE declaration, element structure, and catches unclosed tags.
+      # Fails if syntax errors or unclosed non-void elements are detected.
+      # ========================================================================
+      - name: Validate HTML
+        run: |
+          echo "=========================================="
+          echo "  STEP 3: VALIDATE HTML                   "
+          echo "=========================================="
+
+          # Navigate into Student-Task-Manager directory if present
+          if [ -d "Student-Task-Manager" ]; then
+            cd Student-Task-Manager
+          fi
+
+          python3 -c "
+          import sys
+          from html.parser import HTMLParser
+
+          class HTMLSyntaxValidator(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.tags = []
+                  # Standard HTML5 void elements that do not require closing tags
+                  self.void_tags = {
+                      'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
+                      'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'
+                  }
+                  self.errors = []
+
+              def handle_starttag(self, tag, attrs):
+                  tag_lower = tag.lower()
+                  if tag_lower not in self.void_tags:
+                      self.tags.append(tag_lower)
+
+              def handle_endtag(self, tag):
+                  tag_lower = tag.lower()
+                  if tag_lower in self.void_tags:
+                      self.errors.append(f'Void element <{tag_lower}> cannot have a closing tag </{tag_lower}>')
+                      return
+                  if not self.tags:
+                      self.errors.append(f'Unexpected closing tag </{tag_lower}> with no matching opening tag')
+                      return
+                  expected = self.tags.pop()
+                  if expected != tag_lower:
+                      self.errors.append(f'Mismatched closing tag: expected </{expected}>, found </{tag_lower}>')
+
+              def close(self):
+                  super().close()
+                  if self.tags:
+                      self.errors.append(f'Unclosed HTML tag(s) at end of file: {self.tags}')
+
+          # 1. Read index.html
+          try:
+              with open('index.html', 'r', encoding='utf-8') as f:
+                  html_content = f.read()
+          except Exception as e:
+              print(f'❌ Failed to open index.html: {e}')
+              sys.exit(1)
+
+          # 2. Check for DOCTYPE declaration
+          if '<!DOCTYPE html>' not in html_content and '<!doctype html>' not in html_content:
+              print('❌ HTML Validation Error: Missing <!DOCTYPE html> declaration')
+              sys.exit(1)
+
+          # 3. Parse and validate tag balance
+          validator = HTMLSyntaxValidator()
+          validator.feed(html_content)
+          validator.close()
+
+          if validator.errors:
+              print('❌ HTML validation failed with errors:')
+              for err in validator.errors:
+                  print(f'   - {err}')
+              sys.exit(1)
+
+          print('✅ HTML validation passed: DOCTYPE verified, all tags properly opened and closed.')
+          "
+
+      # ========================================================================
+      # STEP 5 — VALIDATE CSS
+      # Checks CSS syntax by verifying comment closures, matching curly braces,
+      # and matching parentheses using Python regex. Fails on syntax defects.
+      # ========================================================================
+      - name: Validate CSS
+        run: |
+          echo "=========================================="
+          echo "  STEP 4: VALIDATE CSS                    "
+          echo "=========================================="
+
+          # Navigate into Student-Task-Manager directory if present
+          if [ -d "Student-Task-Manager" ]; then
+            cd Student-Task-Manager
+          fi
+
+          python3 -c "
+          import sys, re
+
+          try:
+              with open('style.css', 'r', encoding='utf-8') as f:
+                  css_content = f.read()
+          except Exception as e:
+              print(f'❌ Failed to open style.css: {e}')
+              sys.exit(1)
+
+          # 1. Check for unclosed comments
+          comments_open = len(re.findall(r'/\*', css_content))
+          comments_close = len(re.findall(r'\*/', css_content))
+          if comments_open != comments_close:
+              print(f'❌ CSS Syntax Error: Unbalanced comments ({comments_open} /* vs {comments_close} */)')
+              sys.exit(1)
+
+          # Strip comments before checking block delimiters
+          clean_css = re.sub(r'/\*.*?\*/', '', css_content, flags=re.DOTALL)
+
+          # 2. Check balanced curly braces
+          braces_open = clean_css.count('{')
+          braces_close = clean_css.count('}')
+          if braces_open != braces_close:
+              print(f'❌ CSS Syntax Error: Unbalanced curly braces ({braces_open} { vs {braces_close} })')
+              sys.exit(1)
+
+          # 3. Check balanced parentheses (used in var, calc, rgb, etc.)
+          parens_open = clean_css.count('(')
+          parens_close = clean_css.count(')')
+          if parens_open != parens_close:
+              print(f'❌ CSS Syntax Error: Unbalanced parentheses ({parens_open} ( vs {parens_close} ))')
+              sys.exit(1)
+
+          if braces_open == 0:
+              print('❌ CSS Error: No style rules found in style.css')
+              sys.exit(1)
+
+          print(f'✅ CSS validation passed: Verified {braces_open} rule blocks, balanced braces, and valid comments.')
+          "
+
+      # ========================================================================
+      # STEP 6 — VALIDATE JAVASCRIPT
+      # Uses Node.js's built-in syntax checker ('node --check') to compile and
+      # validate the JavaScript syntax of script.js without executing it.
+      # Fails immediately if any syntax error is present.
+      # ========================================================================
+      - name: Validate JavaScript
+        run: |
+          echo "=========================================="
+          echo "  STEP 5: VALIDATE JAVASCRIPT             "
+          echo "=========================================="
+
+          # Navigate into Student-Task-Manager directory if present
+          if [ -d "Student-Task-Manager" ]; then
+            cd Student-Task-Manager
+          fi
+
+          echo "Validating JavaScript syntax using 'node --check'..."
+          node --check script.js
+          echo "✅ JavaScript validation passed: script.js syntax is clean and error-free."
+

@@ -118,3 +118,4 @@ The workflow triggers on:
 
 ### 5. Why is this lightweight validation ideal for a static web application?
 **Answer:** It has zero external dependencies, requires no heavy `node_modules` or `package.json`, executes in under 10 seconds on GitHub Actions, and prevents corrupt or broken code from entering the production branch.
+
