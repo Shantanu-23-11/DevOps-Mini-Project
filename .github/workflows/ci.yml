@@ -96,6 +96,8 @@ jobs:
           import sys
           from html.parser import HTMLParser
 
+          sys.stdout.reconfigure(encoding='utf-8')
+
           class HTMLSyntaxValidator(HTMLParser):
               def __init__(self):
                   super().__init__()
@@ -115,26 +117,26 @@ jobs:
               def handle_endtag(self, tag):
                   tag_lower = tag.lower()
                   if tag_lower in self.void_tags:
-                      self.errors.append(f'Void element <{tag_lower}> cannot have a closing tag </{tag_lower}>')
+                      self.errors.append('Void element <' + tag_lower + '> cannot have a closing tag </' + tag_lower + '>')
                       return
                   if not self.tags:
-                      self.errors.append(f'Unexpected closing tag </{tag_lower}> with no matching opening tag')
+                      self.errors.append('Unexpected closing tag </' + tag_lower + '> with no matching opening tag')
                       return
                   expected = self.tags.pop()
                   if expected != tag_lower:
-                      self.errors.append(f'Mismatched closing tag: expected </{expected}>, found </{tag_lower}>')
+                      self.errors.append('Mismatched closing tag: expected </' + expected + '>, found </' + tag_lower + '>')
 
               def close(self):
                   super().close()
                   if self.tags:
-                      self.errors.append(f'Unclosed HTML tag(s) at end of file: {self.tags}')
+                      self.errors.append('Unclosed HTML tag(s) at end of file: ' + str(self.tags))
 
           # 1. Read index.html
           try:
               with open('index.html', 'r', encoding='utf-8') as f:
                   html_content = f.read()
           except Exception as e:
-              print(f'❌ Failed to open index.html: {e}')
+              print('❌ Failed to open index.html: ' + str(e))
               sys.exit(1)
 
           # 2. Check for DOCTYPE declaration
@@ -150,7 +152,7 @@ jobs:
           if validator.errors:
               print('❌ HTML validation failed with errors:')
               for err in validator.errors:
-                  print(f'   - {err}')
+                  print('   - ' + str(err))
               sys.exit(1)
 
           print('✅ HTML validation passed: DOCTYPE verified, all tags properly opened and closed.')
@@ -175,18 +177,20 @@ jobs:
           python3 -c "
           import sys, re
 
+          sys.stdout.reconfigure(encoding='utf-8')
+
           try:
               with open('style.css', 'r', encoding='utf-8') as f:
                   css_content = f.read()
           except Exception as e:
-              print(f'❌ Failed to open style.css: {e}')
+              print('❌ Failed to open style.css: ' + str(e))
               sys.exit(1)
 
           # 1. Check for unclosed comments
           comments_open = len(re.findall(r'/\*', css_content))
           comments_close = len(re.findall(r'\*/', css_content))
           if comments_open != comments_close:
-              print(f'❌ CSS Syntax Error: Unbalanced comments ({comments_open} /* vs {comments_close} */)')
+              print('❌ CSS Syntax Error: Unbalanced comments (' + str(comments_open) + ' /* vs ' + str(comments_close) + ' */)')
               sys.exit(1)
 
           # Strip comments before checking block delimiters
@@ -196,21 +200,21 @@ jobs:
           braces_open = clean_css.count('{')
           braces_close = clean_css.count('}')
           if braces_open != braces_close:
-              print(f'❌ CSS Syntax Error: Unbalanced curly braces ({braces_open} { vs {braces_close} })')
+              print('❌ CSS Syntax Error: Unbalanced curly braces (' + str(braces_open) + ' open vs ' + str(braces_close) + ' close)')
               sys.exit(1)
 
           # 3. Check balanced parentheses (used in var, calc, rgb, etc.)
           parens_open = clean_css.count('(')
           parens_close = clean_css.count(')')
           if parens_open != parens_close:
-              print(f'❌ CSS Syntax Error: Unbalanced parentheses ({parens_open} ( vs {parens_close} ))')
+              print('❌ CSS Syntax Error: Unbalanced parentheses (' + str(parens_open) + ' open vs ' + str(parens_close) + ' close)')
               sys.exit(1)
 
           if braces_open == 0:
               print('❌ CSS Error: No style rules found in style.css')
               sys.exit(1)
 
-          print(f'✅ CSS validation passed: Verified {braces_open} rule blocks, balanced braces, and valid comments.')
+          print('✅ CSS validation passed: Verified ' + str(braces_open) + ' rule blocks, balanced braces, and valid comments.')
           "
 
       # ========================================================================
@@ -233,4 +237,3 @@ jobs:
           echo "Validating JavaScript syntax using 'node --check'..."
           node --check script.js
           echo "✅ JavaScript validation passed: script.js syntax is clean and error-free."
-
