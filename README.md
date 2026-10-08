@@ -119,6 +119,4 @@ Runs on `ubuntu-latest` **only after `continuous-integration` passes**.
   3. Configures GitHub Pages metadata with `actions/configure-pages@v5`.
   4. Bundles `_site/` into an artifact using `actions/upload-pages-artifact@v3`.
   5. Deploys live to GitHub Pages with `actions/deploy-pages@v4`.
- 
----
-oken exchange between GitHub Actions and GitHub Pages.
+
