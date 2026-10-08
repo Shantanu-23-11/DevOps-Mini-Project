@@ -1,16 +1,18 @@
 # ==============================================================================
-# GitHub Actions CI Workflow for Student Task Manager
-# Phase 3: Continuous Integration (CI) Pipeline
+# GitHub Actions CI/CD Workflow for Student Task Manager
+# Phase 3: Continuous Integration (CI)
+# Phase 4: Continuous Deployment (CD) using GitHub Pages
 # 
 # Project Topic: "CI/CD Pipeline for a Web Application using DevOps Tools"
 # ==============================================================================
 
-name: CI Pipeline
+name: CI/CD Pipeline
 
 # ------------------------------------------------------------------------------
 # Workflow Triggers:
-# 1. On every code push to the 'main' branch
-# 2. On any pull request opened/updated targeting the 'main' branch
+# 1. Push to main: triggers CI, and if successful, triggers CD (deployment)
+# 2. Pull Request to main: triggers CI only (validation without deploying)
+# 3. workflow_dispatch: allows manual triggering from the GitHub Actions tab
 # ------------------------------------------------------------------------------
 on:
   push:
@@ -19,11 +21,34 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 # ------------------------------------------------------------------------------
-# CI Jobs Definition
+# Global Permissions:
+# - contents: read (to checkout repository files)
+# - pages: write (required to deploy artifact to GitHub Pages)
+# - id-token: write (required to verify OpenID Connect deployment token)
+# ------------------------------------------------------------------------------
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent simultaneous deployments from conflicting with each other
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+# ------------------------------------------------------------------------------
+# Jobs Definition:
+# 1. continuous-integration: Validates structure, HTML, CSS, and JS
+# 2. continuous-deployment: Packages & deploys to GitHub Pages (depends on CI)
 # ------------------------------------------------------------------------------
 jobs:
+
+  # ============================================================================
+  # JOB 1: CONTINUOUS INTEGRATION (CI)
+  # ============================================================================
   continuous-integration:
     name: Continuous Integration
     runs-on: ubuntu-latest
@@ -200,14 +225,14 @@ jobs:
           braces_open = clean_css.count('{')
           braces_close = clean_css.count('}')
           if braces_open != braces_close:
-              print('❌ CSS Syntax Error: Unbalanced curly braces (' + str(braces_open) + ' open vs ' + str(braces_close) + ' close)')
+              print('❌ CSS Syntax Error: Unbalanced curly braces (' + str(braces_open) + ' { vs ' + str(braces_close) + ' })')
               sys.exit(1)
 
           # 3. Check balanced parentheses (used in var, calc, rgb, etc.)
           parens_open = clean_css.count('(')
           parens_close = clean_css.count(')')
           if parens_open != parens_close:
-              print('❌ CSS Syntax Error: Unbalanced parentheses (' + str(parens_open) + ' open vs ' + str(parens_close) + ' close)')
+              print('❌ CSS Syntax Error: Unbalanced parentheses (' + str(parens_open) + ' ( vs ' + str(parens_close) + ' ))')
               sys.exit(1)
 
           if braces_open == 0:
@@ -237,3 +262,63 @@ jobs:
           echo "Validating JavaScript syntax using 'node --check'..."
           node --check script.js
           echo "✅ JavaScript validation passed: script.js syntax is clean and error-free."
+
+  # ============================================================================
+  # JOB 2: CONTINUOUS DEPLOYMENT (CD)
+  # Automatically deploys to GitHub Pages ONLY after CI succeeds on main branch.
+  # ============================================================================
+  continuous-deployment:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: continuous-integration
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # Step 1: Checkout repository files
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Package static website assets into a clean deployment folder
+      - name: Package Static Website
+        run: |
+          echo "=========================================="
+          echo "  STEP: PACKAGE STATIC WEBSITE            "
+          echo "=========================================="
+
+          # Create distribution directory for GitHub Pages
+          mkdir -p _site
+
+          # Copy core static files to _site root
+          if [ -d "Student-Task-Manager" ]; then
+            echo "Copying static assets from Student-Task-Manager/..."
+            cp Student-Task-Manager/index.html _site/
+            cp Student-Task-Manager/style.css _site/
+            cp Student-Task-Manager/script.js _site/
+          else
+            echo "Copying static assets from repository root..."
+            cp index.html _site/
+            cp style.css _site/
+            cp script.js _site/
+          fi
+
+          echo "✅ Packaged website assets in _site/:"
+          ls -la _site/
+
+      # Step 3: Setup GitHub Pages metadata & configurations
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # Step 4: Upload package as a GitHub Pages artifact
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      # Step 5: Deploy the artifact live to GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

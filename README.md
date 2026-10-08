@@ -3,13 +3,22 @@
 > **Phase 1:** Web Application (HTML5, CSS3, JavaScript)  
 > **Phase 2:** Git & GitHub Version Control  
 > **Phase 3:** Continuous Integration (CI) using GitHub Actions  
+> **Phase 4:** Continuous Deployment (CD) using GitHub Pages  
 
 ---
 
 ## 📌 Project Overview
-**Student Task Manager** is a modern, lightweight, responsive web application designed for students to organize academic tasks, deadlines, and study goals effectively.
+**Student Task Manager** is a modern, responsive, client-side web application designed for students to organize academic tasks, deadlines, and study goals effectively.
 
-This project implements an automated **DevOps Continuous Integration (CI) Pipeline** using **GitHub Actions** that automatically checks, lints, and validates all application source code upon every push or pull request to the `main` branch.
+This project implements a complete, end-to-end **DevOps CI/CD Pipeline** using **GitHub Actions** and **GitHub Pages**:
+- **Continuous Integration (CI)**: Automatically checks project structure, validates HTML syntax, verifies CSS rules, and compiles JavaScript syntax on an Ubuntu runner on every commit.
+- **Continuous Deployment (CD)**: Automatically packages the application and deploys it live to **GitHub Pages** immediately after CI validation succeeds.
+
+---
+
+## 🌐 Live Website (GitHub Pages)
+The deployed Student Task Manager is accessible at:  
+👉 **[https://shantanu-23-11.github.io/DevOps-Mini-Project/](https://shantanu-23-11.github.io/DevOps-Mini-Project/)**
 
 ---
 
@@ -18,7 +27,8 @@ This project implements an automated **DevOps Continuous Integration (CI) Pipeli
 - **Storage**: Browser LocalStorage API (zero backend / zero database)
 - **Version Control**: Git & GitHub
 - **DevOps CI Tool**: GitHub Actions (`ubuntu-latest` runner)
-- **Validation**: Python3 HTML/CSS parsers, Node.js syntax compiler (`node --check`)
+- **DevOps CD Tool**: GitHub Pages (`actions/deploy-pages@v4`)
+- **Code Validation**: Python3 HTML/CSS parsers, Node.js syntax compiler (`node --check`)
 
 ---
 
@@ -28,12 +38,12 @@ DevOps-Mini-Project/
 │
 ├── .github/
 │   └── workflows/
-│       └── ci.yml             # GitHub Actions CI Workflow configuration
+│       └── ci.yml             # Complete CI/CD Pipeline Workflow
 │
 ├── Student-Task-Manager/
 │   ├── .github/
 │   │   └── workflows/
-│   │       └── ci.yml         # Workflow copy
+│   │       └── ci.yml         # Subfolder workflow copy
 │   ├── index.html             # Semantic HTML5 markup & dashboard
 │   ├── style.css              # Responsive styling & CSS variables
 │   ├── script.js              # Vanilla JS logic & state management
@@ -41,12 +51,12 @@ DevOps-Mini-Project/
 │   └── .gitignore             # Git ignore configuration
 │
 ├── .gitignore                 # Root Git ignore configuration
-└── README.md                  # Root documentation
+└── README.md                  # Root repository documentation
 ```
 
 ---
 
-## 🔄 CI/CD Pipeline Architecture (Phase 3: CI)
+## 🔄 End-to-End DevOps CI/CD Pipeline Flow
 
 ```text
  Developer
@@ -57,65 +67,80 @@ DevOps-Mini-Project/
     ↓
  GitHub Repository (main branch)
     ↓
- GitHub Actions Runner (ubuntu-latest)
+ ┌─────────────────────────────────────────────────────────────────┐
+ │ JOB 1: CONTINUOUS INTEGRATION (CI)                              │
+ │                                                                 │
+ │ 1. Checkout Code (actions/checkout@v4)                          │
+ │ 2. Validate Project Structure (index.html, style.css, script.js)│
+ │ 3. Validate HTML (DOCTYPE & tag balance verification)           │
+ │ 4. Validate CSS (Brace, parenthesis & comment syntax)           │
+ │ 5. Validate JavaScript (node --check script.js AST parsing)     │
+ └─────────────────────────────────────────────────────────────────┘
     ↓
- ┌──────────────────────────────────────────────┐
- │ 1. Checkout Code (actions/checkout@v4)       │
- ├──────────────────────────────────────────────┤
- │ 2. Validate Project Structure                │
- │    - Verifies index.html, style.css, script  │
- ├──────────────────────────────────────────────┤
- │ 3. Validate HTML                             │
- │    - DOCTYPE check, tag balance, no unclosed │
- ├──────────────────────────────────────────────┤
- │ 4. Validate CSS                              │
- │    - Balanced braces, parentheses, comments  │
- ├──────────────────────────────────────────────┤
- │ 5. Validate JavaScript                       │
- │    - node --check script.js (syntax parsing) │
- └──────────────────────────────────────────────┘
+    ├── [CI FAILS] ──→ ❌ Pipeline Stops (Deployment is BLOCKED)
     ↓
- CI Pipeline Successful ✅
+ [CI SUCCEEDS]
+    ↓
+ ┌─────────────────────────────────────────────────────────────────┐
+ │ JOB 2: CONTINUOUS DEPLOYMENT (CD)                               │
+ │ (Depends on CI via: needs: continuous-integration)              │
+ │                                                                 │
+ │ 1. Checkout Code                                                │
+ │ 2. Package Static Website (copy assets to _site/)               │
+ │ 3. Setup GitHub Pages (actions/configure-pages@v5)              │
+ │ 4. Upload Pages Artifact (actions/upload-pages-artifact@v3)     │
+ │ 5. Deploy to GitHub Pages (actions/deploy-pages@v4)             │
+ └─────────────────────────────────────────────────────────────────┘
+    ↓
+ CI/CD Pipeline Successful ✅
+    ↓
+ Live Website Updated on GitHub Pages 🚀
 ```
 
 ---
 
-## 🚀 How to Run the Web Application Locally
-1. Navigate to the `Student-Task-Manager/` folder.
-2. Double-click `index.html` to open it in any web browser (Edge, Chrome, Firefox).
-3. No build tools, package managers, or server installations are needed.
+## 🤖 GitHub Actions Workflow Jobs (`ci.yml`)
 
----
-
-## 🤖 GitHub Actions Workflow Summary (`ci.yml`)
-
-The workflow triggers on:
-- **`push`** to `main`
-- **`pull_request`** targeting `main`
-
-### Pipeline Steps:
+### Job 1: `continuous-integration`
+Runs on `ubuntu-latest`.
 1. **Checkout Code**: Downloads repository files into the GitHub runner workspace.
-2. **Validate Project Structure**: Ensures required files (`index.html`, `style.css`, `script.js`) exist. Fails the build if any required file is missing.
+2. **Validate Project Structure**: Ensures required files (`index.html`, `style.css`, `script.js`) exist.
 3. **Validate HTML**: Uses Python's built-in `html.parser` to ensure `<DOCTYPE>` is defined, tags are balanced, and void elements are correctly formatted.
 4. **Validate CSS**: Checks that all CSS curly braces `{}` and parentheses `()` are balanced, and that all `/* */` comments are closed.
-5. **Validate JavaScript**: Uses `node --check script.js` to compile the AST and verify syntax without executing the script.
+5. **Validate JavaScript**: Uses `node --check script.js` to compile the AST and verify syntax without executing client code.
+
+### Job 2: `continuous-deployment`
+Runs on `ubuntu-latest` **only after `continuous-integration` passes**.
+- Enforces strict dependency: `needs: continuous-integration`.
+- Guard condition: `if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')`.
+- Actions performed:
+  1. Clones repository code.
+  2. Packages `index.html`, `style.css`, and `script.js` into `_site/`.
+  3. Configures GitHub Pages metadata with `actions/configure-pages@v5`.
+  4. Bundles `_site/` into an artifact using `actions/upload-pages-artifact@v3`.
+  5. Deploys live to GitHub Pages with `actions/deploy-pages@v4`.
 
 ---
 
-## 🎓 Viva Questions & Answers (DevOps CI Focus)
+## 🎓 Viva Questions & Answers (DevOps CI/CD Focus)
 
-### 1. What is Continuous Integration (CI)?
-**Answer:** Continuous Integration is a DevOps software development practice where developers merge their code changes frequently into a central repository. Automated builds and tests run on every commit to detect and fix defects early in the development lifecycle.
+### 1. What is Continuous Deployment (CD)?
+**Answer:** Continuous Deployment is a DevOps practice where every code change that passes all stages of the Continuous Integration pipeline is automatically released to the production environment without manual human intervention.
 
-### 2. What triggers the CI pipeline in your project?
-**Answer:** The workflow triggers automatically whenever new commits are pushed to the `main` branch, or when a pull request targeting `main` is created or updated.
+### 2. How are CI and CD connected in your workflow?
+**Answer:** In `.github/workflows/ci.yml`, the deployment job defines `needs: continuous-integration`. This creates an explicit execution dependency in the directed acyclic graph (DAG) of GitHub Actions. The deployment job will not start unless the CI job completes with a `success` status code.
 
-### 3. What environment does the CI workflow run on?
-**Answer:** It runs on a hosted GitHub Actions runner running `ubuntu-latest`, providing an isolated, clean virtual Linux environment for every build.
+### 3. What happens if a developer pushes code with a syntax error?
+**Answer:** The CI job will detect the error (e.g., mismatched HTML tag, unclosed CSS brace, or JS syntax defect) and exit with code 1, marking CI as failed. Because deployment depends on CI, the deployment job is automatically skipped. The live production website remains safe and unaffected.
 
-### 4. How does the pipeline validate JavaScript without running it?
-**Answer:** It uses Node.js's built-in `node --check script.js` command. The `--check` flag parses the source code into an Abstract Syntax Tree (AST) to verify syntax without executing client-side browser DOM code.
+### 4. What does GitHub Pages do?
+**Answer:** GitHub Pages is a static site hosting service that serves HTML, CSS, and JavaScript files directly from a GitHub repository or through artifacts generated by GitHub Actions.
 
-### 5. Why is this lightweight validation ideal for a static web application?
-**Answer:** It has zero external dependencies, requires no heavy `node_modules` or `package.json`, executes in under 10 seconds on GitHub Actions, and prevents corrupt or broken code from entering the production branch.
+### 5. Why do we package the files into `_site` before deploying?
+**Answer:** Packaging creates a clean distribution artifact containing only production assets (`index.html`, `style.css`, `script.js`), excluding internal repository metadata such as `.github/`, `README.md`, and `.gitignore`.
 
+### 6. What permissions are required for GitHub Pages deployment?
+**Answer:** 
+- `contents: read`: to checkout repository source code.
+- `pages: write`: to upload and deploy to GitHub Pages.
+- `id-token: write`: for OpenID Connect (OIDC) authentication token exchange between GitHub Actions and GitHub Pages.
